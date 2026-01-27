@@ -1,0 +1,19 @@
+{
+  "name": "viewer",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:test": "vite serve src/test/",
+    "build": "tsc --noEmit && bun build ./index.html --outdir dist"
+  },
+  "devDependencies": {
+    "@types/three": "^0.182.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  },
+  "dependencies": {
+    "three": "^0.182.0"
+  }
+}
