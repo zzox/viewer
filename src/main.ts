@@ -11,8 +11,18 @@ let camera:THREE.PerspectiveCamera,
   controls:OrbitControls,
   object:THREE.Object3D
 
+
+// let texture:THREE.FramebufferTexture,
+//   cameraOrtho:THREE.OrthographicCamera,
+//   sceneOrtho:THREE.Scene,
+//   sprite:THREE.Sprite
+
 const width = 640
 const height = 640
+
+// const textureSize = 512
+
+// const vector = new THREE.Vector2()
 
 const go = async () => {
   // const canvas:HTMLCanvasElement = document.querySelector('#canvas')!
@@ -32,9 +42,13 @@ const go = async () => {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 20)
   camera.position.z = 2.5
 
+  // cameraOrtho = new THREE.OrthographicCamera( - width / 2, width / 2, height / 2, - height / 2, 1, 10 );
+  // cameraOrtho.position.z = 10;
+
   // scene
 
   scene = new THREE.Scene()
+  // sceneOrtho = new THREE.Scene();
 
   const ambientLight = new THREE.AmbientLight(0xffffff)
   scene.add(ambientLight)
@@ -61,11 +75,28 @@ const go = async () => {
   console.log(object)
   //
 
-  renderer = new THREE.WebGLRenderer({  preserveDrawingBuffer: true, antialias: false })
+  renderer = new THREE.WebGLRenderer({ /* preserveDrawingBuffer: true, */ /* antialias: false */ })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
   renderer.setAnimationLoop(animate)
   document.body.appendChild(renderer.domElement)
+
+
+  // texture = new THREE.FramebufferTexture( textureSize, textureSize );
+
+  //
+
+  // const spriteMaterial = new THREE.SpriteMaterial( { map: texture } );
+  // sprite = new THREE.Sprite( spriteMaterial );
+  // sprite.scale.set( textureSize, textureSize, 1 );
+  // sceneOrtho.add( sprite );
+  // const halfWidth = width / 2;
+  // const halfHeight = height / 2;
+
+  // const halfImageWidth = textureSize / 2;
+  // const halfImageHeight = textureSize / 2;
+
+  // sprite.position.set(-halfWidth + halfImageWidth, halfHeight - halfImageHeight, 1 );
 
   // rt = new THREE.WebGLRenderTarget()
   // rt.setSize(256, 256)
@@ -153,27 +184,40 @@ const animate = () => {
 
   // renderer.setRenderTarget(null)
 
+  renderer.clear()
   renderer.render(scene, camera)
 
-    if (Math.random() < 0.01) {
-      
-      // const pixels = new Uint8Array(64 * 64 * 4)
-      
-      // const pixels = new Uint8Array(64 * 64 * 4)
-      // renderer.readRenderTargetPixels(rt, 0, 0, 64, 64, pixels)
-      
-      var gl = renderer.getContext()
-      const pixels = new Uint8Array(64 * 64 * 4);
-      gl.readPixels(300, 300, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
-      console.log(pixels)
-      
-      console.log(pixels.filter(v => v !== 0 && v !== 255).length)
-      
+    // calculate start position for copying data
+
+    // const dpr = 1
+
+    // vector.x = ( window.innerWidth * dpr / 2 ) - ( textureSize / 2 );
+    // vector.y = ( window.innerHeight * dpr / 2 ) - ( textureSize / 2 );
+
+    // renderer.copyFramebufferToTexture( texture, vector );
+
+    // renderer.clearDepth();
+    // renderer.render( sceneOrtho, cameraOrtho );
+
+  if (Math.random() < 0.01) {
+    // const pixels = new Uint8Array(64 * 64 * 4)
+
+    // const pixels = new Uint8Array(64 * 64 * 4)
+    // renderer.readRenderTargetPixels(rt, 0, 0, 64, 64, pixels)
+    console.time('asdf')
+    var gl = renderer.getContext()
+    const pixels = new Uint8Array(64 * 64 * 4);
+    gl.readPixels(300, 300, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+    console.log(pixels)
+
+    console.log(pixels.filter(v => v !== 0 && v !== 255).length)
+
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const context = canvas.getContext('2d')!
     const imageData = context.createImageData(64, 64)
     imageData.data.set(pixels)
     context.putImageData(imageData, 0, 0)
+    console.timeEnd('asdf')
   }
 }
 
