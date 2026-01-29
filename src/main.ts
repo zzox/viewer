@@ -184,7 +184,7 @@ const animate = () => {
 
   // renderer.setRenderTarget(null)
 
-  renderer.clear()
+  // renderer.clear()
   renderer.render(scene, camera)
 
     // calculate start position for copying data
@@ -205,18 +205,24 @@ const animate = () => {
     // const pixels = new Uint8Array(64 * 64 * 4)
     // renderer.readRenderTargetPixels(rt, 0, 0, 64, 64, pixels)
     console.time('asdf')
-    var gl = renderer.getContext()
-    const pixels = new Uint8Array(64 * 64 * 4);
-    gl.readPixels(300, 300, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
-    console.log(pixels)
-
-    console.log(pixels.filter(v => v !== 0 && v !== 255).length)
-
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
-    const context = canvas.getContext('2d')!
-    const imageData = context.createImageData(64, 64)
-    imageData.data.set(pixels)
-    context.putImageData(imageData, 0, 0)
+    const twoDcontext = canvas.getContext('2d')!
+    const imageData = twoDcontext.createImageData(64, 64)
+    var gl = renderer.getContext()
+
+    for (let i = 0; i < 4; i++) {
+      object.rotateY(Math.PI / 2)
+      const pixels = new Uint8Array(64 * 64 * 4);
+      gl.readPixels(640 - 32, 640 - 32, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+      console.log(pixels)
+
+      console.log(pixels.filter(v => v !== 0 && v !== 255).length)
+
+      renderer.render(scene, camera)
+
+      imageData.data.set(pixels)
+      twoDcontext.putImageData(imageData, i * 64, 0)
+    }
     console.timeEnd('asdf')
   }
 }
