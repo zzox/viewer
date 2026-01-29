@@ -79,7 +79,8 @@ const go = async () => {
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
   renderer.setAnimationLoop(animate)
-  document.body.appendChild(renderer.domElement)
+  const container = document.querySelector('#container')
+  container!.prepend(renderer.domElement)
 
 
   // texture = new THREE.FramebufferTexture( textureSize, textureSize );
@@ -109,7 +110,6 @@ const go = async () => {
   controls.enableDamping = true
   controls.minDistance = 2
   controls.maxDistance = 5
-
   //
 
   // window.addEventListener('resize', onWindowResize)

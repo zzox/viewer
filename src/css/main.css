@@ -1,3 +1,16 @@
 body {
   background-color: darkslategrey;
 }
+
+#container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#container > div {
+  position: absolute;
+  border: 1px solid white;
+  height: 64px;
+  width: 64px;
+}
