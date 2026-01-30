@@ -69,8 +69,8 @@ const go = async () => {
     canvas.height = targetHeight
     canvas.style.width = `${previewScale * canvas.width}px`
     canvas.style.height = `${previewScale * canvas.height}px`
-    target.style.width = targetWidth + ''
-    target.style.height = targetHeight + ''
+    target.style.width = `${targetWidth}px`
+    target.style.height = `${targetHeight}px`
   }
 
   document.querySelector<HTMLInputElement>('#target-width')!.onchange = (el) => {
@@ -114,13 +114,14 @@ const animate = () => {
     const twoDcontext = canvas.getContext('2d')!
     const gl = renderer.getContext()
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < numAngles; i++) {
+      // renderer.clear(true)
       renderer.render(scene, camera)
       twoDcontext.drawImage(gl.canvas,
         width / 2 - targetWidth / 2, height / 2 - targetHeight / 2,
         targetWidth, targetHeight, i * targetWidth, 0, targetWidth, targetHeight
       )
-      object.rotateY(Math.PI / 2)
+      object.rotateY(Math.PI * 2 / numAngles)
     }
     console.timeEnd('asdf')
   }
