@@ -122,9 +122,11 @@ const animate = () => {
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const twoDcontext = canvas.getContext('2d')!
     const gl = renderer.getContext()
+    twoDcontext.clearRect(0, 0, targetWidth * numAngles, targetHeight)
 
     for (let i = 0; i < numAngles; i++) {
-      // renderer.clear(true)
+      renderer.setClearColor(0x000000, 0)
+      renderer.clear(true)
       renderer.render(scene, camera)
       twoDcontext.drawImage(gl.canvas,
         width / 2 - targetWidth / 2, height / 2 - targetHeight / 2,
@@ -132,6 +134,7 @@ const animate = () => {
       )
       object.rotateY(Math.PI * 2 / numAngles)
     }
+    renderer.setClearColor(0x000000, 1)
     console.timeEnd('asdf')
   }
 }
