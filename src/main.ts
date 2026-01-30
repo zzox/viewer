@@ -14,11 +14,16 @@ let targetWidth = 64
 let previewScale = 4
 let numAngles = 4
 
-const width = 640
-const height = 640
+const width = 128
+const height = 128
 
 const target:HTMLDivElement = document.querySelector('#target')!
 const canvas:HTMLCanvasElement = document.querySelector('#twod')!
+
+const viewportScale = 4
+
+target.style.width = `${targetWidth * viewportScale}px`
+target.style.height = `${targetHeight * viewportScale}px`
 
 const go = async () => {
   // camera
@@ -59,6 +64,10 @@ const go = async () => {
   const container = document.querySelector('#container')
   container!.prepend(renderer.domElement)
 
+  renderer.domElement.style.imageRendering = 'pixelated'
+  renderer.domElement.style.width = `${width * viewportScale}px`
+  renderer.domElement.style.height = `${height * viewportScale}px`
+
   controls = new OrbitControls(camera, renderer.domElement)
   controls.enableDamping = true
   controls.minDistance = 2
@@ -67,10 +76,10 @@ const go = async () => {
   const updateItems = () => {
     canvas.width = numAngles * targetWidth
     canvas.height = targetHeight
-    canvas.style.width = `${previewScale * canvas.width}px`
-    canvas.style.height = `${previewScale * canvas.height}px`
-    target.style.width = `${targetWidth}px`
-    target.style.height = `${targetHeight}px`
+    canvas.style.width = `${canvas.width * previewScale}px`
+    canvas.style.height = `${canvas.height * previewScale}px`
+    target.style.width = `${targetWidth * viewportScale}px`
+    target.style.height = `${targetHeight * viewportScale}px`
   }
 
   document.querySelector<HTMLInputElement>('#target-width')!.onchange = (el) => {
