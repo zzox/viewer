@@ -9,8 +9,16 @@ let camera:THREE.PerspectiveCamera,
   controls:OrbitControls,
   object:THREE.Object3D
 
+let targetHeight = 64
+let targetWidth = 64
+let previewScale = 4
+let numAngles = 4
+
 const width = 640
 const height = 640
+
+const target:HTMLDivElement = document.querySelector('#target')!
+const canvas:HTMLCanvasElement = document.querySelector('#twod')!
 
 const go = async () => {
   // camera
@@ -23,8 +31,9 @@ const go = async () => {
   const ambientLight = new THREE.AmbientLight(0xffffff)
   scene.add(ambientLight)
 
-  const pointLight = new THREE.PointLight(0xffffff, 15)
+  const pointLight = new THREE.PointLight(0xffffff, 200)
   camera.add(pointLight)
+  pointLight.position.set(5, 5, 5)
   scene.add(camera)
 
   // model
@@ -44,7 +53,7 @@ const go = async () => {
   console.log(object)
 
   renderer = new THREE.WebGLRenderer({ /* preserveDrawingBuffer: true, */ /* antialias: false */ })
-  renderer.setPixelRatio(window.devicePixelRatio)
+  // renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
   renderer.setAnimationLoop(animate)
   const container = document.querySelector('#container')
@@ -54,6 +63,32 @@ const go = async () => {
   controls.enableDamping = true
   controls.minDistance = 2
   controls.maxDistance = 20
+
+  const updateItems = () => {
+    canvas.width = numAngles * targetWidth
+    canvas.height = targetHeight
+    canvas.style.width = `${previewScale * canvas.width}px`
+    canvas.style.height = `${previewScale * canvas.height}px`
+    target.style.width = targetWidth + ''
+    target.style.height = targetHeight + ''
+  }
+
+  document.querySelector<HTMLInputElement>('#target-width')!.onchange = (el) => {
+    targetWidth = parseInt(el.currentTarget!.value)
+    updateItems()
+  }
+  document.querySelector<HTMLInputElement>('#target-height')!.onchange = (el) => {
+    targetHeight = parseInt(el.currentTarget!.value)
+    updateItems()
+  }
+  document.querySelector<HTMLInputElement>('#num-angles')!.onchange = (el) => {
+    numAngles = parseInt(el.currentTarget!.value)
+    updateItems()
+  }
+  document.querySelector<HTMLInputElement>('#preview-scale')!.onchange = (el) => {
+    previewScale = parseInt(el.currentTarget!.value)
+    updateItems()
+  }
 
   // window.addEventListener('resize', onWindowResize)
   renderer.domElement.addEventListener('click', clickMe)
@@ -81,7 +116,10 @@ const animate = () => {
 
     for (let i = 0; i < 4; i++) {
       renderer.render(scene, camera)
-      twoDcontext.drawImage(gl.canvas, 640 - 32, 640 - 32, 64, 64, i * 64, 0, 64, 64)
+      twoDcontext.drawImage(gl.canvas,
+        width / 2 - targetWidth / 2, height / 2 - targetHeight / 2,
+        targetWidth, targetHeight, i * targetWidth, 0, targetWidth, targetHeight
+      )
       object.rotateY(Math.PI / 2)
     }
     console.timeEnd('asdf')
