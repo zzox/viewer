@@ -207,21 +207,21 @@ const animate = () => {
     console.time('asdf')
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const twoDcontext = canvas.getContext('2d')!
-    const imageData = twoDcontext.createImageData(64, 64)
-    var gl = renderer.getContext()
+    // const imageData = twoDcontext.createImageData(64, 64)
+    const gl = renderer.getContext()
 
     for (let i = 0; i < 4; i++) {
-      object.rotateY(Math.PI / 2)
-      const pixels = new Uint8Array(64 * 64 * 4);
-      gl.readPixels(640 - 32, 640 - 32, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
-      console.log(pixels)
+      // const pixels = new Uint8Array(64 * 64 * 4);
+      // gl.readPixels(640 - 32, 640 - 32, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels)
+      // console.log(pixels)
 
-      console.log(pixels.filter(v => v !== 0 && v !== 255).length)
+      // console.log(pixels.filter(v => v !== 0 && v !== 255).length)
 
       renderer.render(scene, camera)
 
-      imageData.data.set(pixels)
-      twoDcontext.putImageData(imageData, i * 64, 0)
+      // imageData.data.set(pixels)
+      twoDcontext.drawImage(gl.canvas, 640 - 32, 640 - 32, 64, 64, i * 64, 0, 64, 64)
+      object.rotateY(Math.PI / 2)
     }
     console.timeEnd('asdf')
   }
