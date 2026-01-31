@@ -16,6 +16,13 @@
       <label>Num Angles</label><input id="num-angles" type="number" value="4" min="1" max="360"></input>
       <label>Preview Scale</label><input id="preview-scale" type="number" value="4" min="1" max="8"></input>
     </form>
+    <form id="lighting">
+      <!-- <input></input> -->
+      <h1>Lighting</h1>
+      <label for="light-angle">Angle</label><input id="light-angle" type="range" name="light-angle" min="0" max="360" step="5"></input>
+      <label for="light-intensity">Intensity</label><input id="light-intensity" type="range" name="light-intensity" min="0" max="1000" step="10" value="100"></input>
+      <label for="light-distance">Distance</label><input id="light-distance" type="range" name="light-distance" min="0" max="10" step="1"></input>
+    </form>
   </main>
   <canvas id="twod" width="256" height="64" style="width: 1024px; height: 256px; image-rendering: pixelated;"></canvas>
   <script type="module" src="./src/main.ts"></script>

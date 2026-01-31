@@ -2,17 +2,25 @@ import * as THREE from 'three'
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
+import { Wireframe } from 'three/addons/lines/Wireframe.js'
+import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js'
 
 let camera:THREE.PerspectiveCamera,
   scene:THREE.Scene,
   renderer:THREE.WebGLRenderer,
   controls:OrbitControls,
-  object:THREE.Object3D
+  object:THREE.Object3D,
+  pointLight:THREE.PointLight
 
 let targetHeight = 64
 let targetWidth = 64
 let previewScale = 4
 let numAngles = 4
+
+let lightAngle = 0
+let lightIntensity = 1
+let lightDistance = 2
 
 const width = 128
 const height = 128
@@ -20,10 +28,39 @@ const height = 128
 const target:HTMLDivElement = document.querySelector('#target')!
 const canvas:HTMLCanvasElement = document.querySelector('#twod')!
 
+let clicked = false
+
+let wireframe:Wireframe
+
 const viewportScale = 4
 
 target.style.width = `${targetWidth * viewportScale}px`
 target.style.height = `${targetHeight * viewportScale}px`
+
+const toRadians = (deg:number) => deg * Math.PI / 180
+
+const updateItems = () => {
+  canvas.width = numAngles * targetWidth
+  canvas.height = targetHeight
+  canvas.style.width = `${canvas.width * previewScale}px`
+  canvas.style.height = `${canvas.height * previewScale}px`
+  target.style.width = `${targetWidth * viewportScale}px`
+  target.style.height = `${targetHeight * viewportScale}px`
+
+  pointLight.intensity = lightIntensity
+  const x = Math.cos(toRadians(lightAngle)) * lightDistance
+  const y = Math.sin(toRadians(lightAngle)) * lightDistance
+  pointLight.position.set(x, lightDistance * .33, y)
+  wireframe.position.set(x, lightDistance * .33, y)
+  console.log(pointLight.position)
+}
+
+const inputParseInt = (selector:string, callback:(n:number) => void) => {
+  document.querySelector<HTMLInputElement>(selector)!.onchange = (el) => {
+    callback(parseInt(el.currentTarget!.value))
+    updateItems()
+  }
+}
 
 const go = async () => {
   // camera
@@ -36,9 +73,22 @@ const go = async () => {
   const ambientLight = new THREE.AmbientLight(0xffffff)
   scene.add(ambientLight)
 
-  const pointLight = new THREE.PointLight(0xffffff, 200)
-  camera.add(pointLight)
-  pointLight.position.set(5, 5, 5)
+  const geo = new THREE.BoxGeometry( 0.25, 0.25, 0.25 );
+  const geometry = new WireframeGeometry2( geo );
+  const matLine = new LineMaterial({
+    color: 0x4080ff,
+    linewidth: 1, // in pixels
+    dashed: false
+  });
+
+  wireframe = new Wireframe( geometry, matLine );
+  wireframe.computeLineDistances();
+  wireframe.scale.set( 1, 1, 1 );
+  scene.add( wireframe );
+
+  pointLight = new THREE.PointLight(0xffffff, 100, 0, 5.0)
+  pointLight.position.set(2, 2, 2)
+  scene.add(pointLight) // need to add point light to scene not camera
   scene.add(camera)
 
   // model
@@ -69,42 +119,24 @@ const go = async () => {
   renderer.domElement.style.height = `${height * viewportScale}px`
 
   controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
-  controls.minDistance = 2
-  controls.maxDistance = 20
+  // controls.enableDamping = true
+  // controls.enableZoom = false
 
-  const updateItems = () => {
-    canvas.width = numAngles * targetWidth
-    canvas.height = targetHeight
-    canvas.style.width = `${canvas.width * previewScale}px`
-    canvas.style.height = `${canvas.height * previewScale}px`
-    target.style.width = `${targetWidth * viewportScale}px`
-    target.style.height = `${targetHeight * viewportScale}px`
-  }
+  inputParseInt('#target-width', (num => targetWidth = num))
+  inputParseInt('#target-height', (num => targetHeight = num))
+  inputParseInt('#num-angles', (num => numAngles = num))
+  inputParseInt('#preview-scale', (num => previewScale = num))
 
-  document.querySelector<HTMLInputElement>('#target-width')!.onchange = (el) => {
-    targetWidth = parseInt(el.currentTarget!.value)
-    updateItems()
-  }
-  document.querySelector<HTMLInputElement>('#target-height')!.onchange = (el) => {
-    targetHeight = parseInt(el.currentTarget!.value)
-    updateItems()
-  }
-  document.querySelector<HTMLInputElement>('#num-angles')!.onchange = (el) => {
-    numAngles = parseInt(el.currentTarget!.value)
-    updateItems()
-  }
-  document.querySelector<HTMLInputElement>('#preview-scale')!.onchange = (el) => {
-    previewScale = parseInt(el.currentTarget!.value)
-    updateItems()
-  }
+  inputParseInt("#light-angle", (num => lightAngle = num))
+  inputParseInt("#light-distance", (num => lightDistance = num))
+  inputParseInt("#light-intensity", (num => lightIntensity = num))
 
   // window.addEventListener('resize', onWindowResize)
   renderer.domElement.addEventListener('click', clickMe)
 }
 
 const clickMe = () => {
-  console.log('clicked')
+  clicked = true
 }
 
 let scale = 1
@@ -117,13 +149,14 @@ const animate = () => {
 
   renderer.render(scene, camera)
 
-  if (Math.random() < 0.01) {
+  if (clicked) {
     console.time('asdf')
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const twoDcontext = canvas.getContext('2d')!
     const gl = renderer.getContext()
     twoDcontext.clearRect(0, 0, targetWidth * numAngles, targetHeight)
 
+    wireframe.visible = false
     for (let i = 0; i < numAngles; i++) {
       renderer.setClearColor(0x000000, 0)
       renderer.clear(true)
@@ -135,6 +168,8 @@ const animate = () => {
       object.rotateY(Math.PI * 2 / numAngles)
     }
     renderer.setClearColor(0x000000, 1)
+    clicked = false
+    wireframe.visible = true
     console.timeEnd('asdf')
   }
 }
