@@ -36,6 +36,12 @@ form > input {
   border: 1px solid white;
   height: 64px;
   width: 64px;
+  pointer-events: none;
+}
+
+#lighting {
+  max-width: 20vw;
+  flex-grow: 1;
 }
 
 #twod {
