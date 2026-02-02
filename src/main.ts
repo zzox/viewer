@@ -6,12 +6,15 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { Wireframe } from 'three/addons/lines/Wireframe.js'
 import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js'
 
+type PaletteList = [number, number, number][]
+
 let camera:THREE.PerspectiveCamera,
   scene:THREE.Scene,
   renderer:THREE.WebGLRenderer,
   controls:OrbitControls,
   object:THREE.Object3D,
-  pointLight:THREE.PointLight
+  pointLight:THREE.PointLight,
+  colors:PaletteList
 
 let targetHeight = 64
 let targetWidth = 64
@@ -62,7 +65,37 @@ const inputParseInt = (selector:string, callback:(n:number) => void) => {
   }
 }
 
+const findColor = (r:number, g:number, b:number, list:PaletteList):[number, number, number] => {
+  let best, bestDistance = 16777216
+  for (let i = 0; i < list.length; i++) {
+    const distance = Math.pow(Math.abs(r - list[i][0]), 2) + Math.pow(Math.abs(g - list[i][1]), 2) + Math.pow(Math.abs(b - list[i][2]), 2)
+    if (distance < bestDistance) {
+      best = list[i]
+      bestDistance = distance
+    }
+  }
+
+  if (best == null) {
+    throw 'None found'
+  }
+
+  return best
+}
+
 const go = async () => {
+  // palette snap colors
+  const paletteFile = await fetch('./palettes/cgarne.gpl')
+  const text = await paletteFile.text()
+  const fileLines = text.split('\n')
+  if (fileLines[0] !== 'GIMP Palette') {
+    console.error('Is this a Gimp Palette?')
+  }
+
+  colors = fileLines
+    .filter((line, i) => i && line && line[0] !== '#')
+    .map(str => str.split('\t'))
+    .map(([r, g, b]) => [parseInt(r), parseInt(g), parseInt(b)])
+
   // camera
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 20)
   camera.position.z = 2.5
@@ -150,7 +183,7 @@ const animate = () => {
   renderer.render(scene, camera)
 
   if (clicked) {
-    console.time('asdf')
+    console.time('render')
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const twoDcontext = canvas.getContext('2d')!
     const gl = renderer.getContext()
@@ -170,7 +203,28 @@ const animate = () => {
     renderer.setClearColor(0x000000, 1)
     clicked = false
     wireframe.visible = true
-    console.timeEnd('asdf')
+
+    // palette snap
+    const imageData = twoDcontext.getImageData(0, 0, canvas.width, canvas.height);
+    const { data } = imageData;
+    for (let i = 0; i < data.length; i += 4) {
+      const idx = i
+
+      if (data[idx + 3] === 255) {// || colorAllAlpha) {
+        const [r, g, b] = findColor(data[idx], data[idx + 1], data[idx + 2], colors)
+        data[idx] = r
+        data[idx + 1] = g
+        data[idx + 2] = b
+      } else {
+        data[idx] = 0
+        data[idx + 1] = 0
+        data[idx + 2] = 0
+        data[idx + 3] = 0
+      }
+    }
+    twoDcontext.putImageData(imageData, 0, 0)
+
+    console.timeEnd('render')
   }
 }
 
