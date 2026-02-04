@@ -84,7 +84,7 @@ const findColor = (r:number, g:number, b:number, list:PaletteList):[number, numb
 
 const go = async () => {
   // palette snap colors
-  const paletteFile = await fetch('./palettes/cgarne.gpl')
+  const paletteFile = await fetch('./palettes/cgarne-exp.gpl')
   const text = await paletteFile.text()
   const fileLines = text.split('\n')
   if (fileLines[0] !== 'GIMP Palette') {
