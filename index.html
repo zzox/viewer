@@ -19,9 +19,14 @@
     <form id="lighting">
       <!-- <input></input> -->
       <h1>Lighting</h1>
-      <label for="light-angle">Angle</label><input id="light-angle" type="range" name="light-angle" min="0" max="360" step="5"></input>
-      <label for="light-intensity">Intensity</label><input id="light-intensity" type="range" name="light-intensity" min="0" max="1000" step="10" value="100"></input>
-      <label for="light-distance">Distance</label><input id="light-distance" type="range" name="light-distance" min="0" max="10" step="1"></input>
+      <div class="field-bar"><label for="light-angle">Angle&nbsp;&nbsp;&nbsp;&nbsp;</label><input id="light-angle" type="range" name="light-angle" min="0" max="360" step="5" value="0"></input><p id="light-angle-field">0</p></div>
+      <div class="field-bar"><label for="light-intensity">Intensity</label><input id="light-intensity" type="range" name="light-intensity" min="0" max="1000" step="10" value="100"></input><p id="light-intensity-field">100</p></div>
+      <div class="field-bar"><label for="light-distance">Distance&nbsp;</label><input id="light-distance" type="range" name="light-distance" min="0" max="10" step="0.1" value="1"></input><p id="light-distance-field">1</p></div>
+    </form>
+    <form id="palette">
+      <!-- <input></input> -->
+      <h1>Palette</h1>
+      <div id="palette-items"></div>
     </form>
   </main>
   <canvas id="twod" width="256" height="64" style="width: 1024px; height: 256px; image-rendering: pixelated;"></canvas>

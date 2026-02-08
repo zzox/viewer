@@ -6,7 +6,8 @@ import { LineMaterial } from 'three/addons/lines/LineMaterial.js'
 import { Wireframe } from 'three/addons/lines/Wireframe.js'
 import { WireframeGeometry2 } from 'three/addons/lines/WireframeGeometry2.js'
 
-type PaletteList = [number, number, number][]
+type Color = [number, number, number]
+type PaletteList = Color[]
 
 let camera:THREE.PerspectiveCamera,
   scene:THREE.Scene,
@@ -82,6 +83,64 @@ const findColor = (r:number, g:number, b:number, list:PaletteList):[number, numb
   return best
 }
 
+const compareColor = (c1:Color, c2:Color):boolean =>
+  c1[0] === c2[0] && c1[1] === c2[1] && c1[2] === c2[2]
+
+const removeColor = (color:Color) => {
+  for (let i = 0; i < colors.length; i++) {
+    if (compareColor(colors[i], color)) {
+      colors.splice(i, 1)
+      break;
+    }
+  }
+}
+
+const addColor = (color:Color) => {
+  colors.push(color)
+}
+
+const createPaletteItems = (list:PaletteList) => {
+  const itemsContainer = document.querySelector('#palette-items')!
+  // itemsContainer.chil
+  // remove children
+
+  list.forEach(color => {
+    const container = document.createElement('div')
+    container.className = 'palette-item'
+
+    const text = document.createElement('p')
+    text.textContent = '#' + color.map(i => {
+      const item = i.toString(16)
+      if (item.length === 0) {
+        return '00'
+      } else if (item.length === 1) {
+        return '0' + item
+      }
+      return item
+    }).join('')
+
+    const box = document.createElement('div')
+    box.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`
+    box.className = 'palette-box'
+
+    const checkbox = document.createElement('input')
+    checkbox.type = 'checkbox'
+    checkbox.checked = true
+    checkbox.onclick = () => {
+      if (checkbox.checked) {
+        addColor(color)
+      } else {
+        removeColor(color)
+      }
+    }
+
+    container.appendChild(text)
+    container.appendChild(box)
+    container.appendChild(checkbox)
+    itemsContainer.appendChild(container)
+  })
+}
+
 const go = async () => {
   // palette snap colors
   const paletteFile = await fetch('./palettes/cgarne-exp.gpl')
@@ -96,6 +155,8 @@ const go = async () => {
     .map(str => str.split('\t'))
     .map(([r, g, b]) => [parseInt(r), parseInt(g), parseInt(b)])
 
+  createPaletteItems(colors)
+
   // camera
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 20)
   camera.position.z = 2.5
@@ -106,18 +167,18 @@ const go = async () => {
   const ambientLight = new THREE.AmbientLight(0xffffff)
   scene.add(ambientLight)
 
-  const geo = new THREE.BoxGeometry( 0.25, 0.25, 0.25 );
-  const geometry = new WireframeGeometry2( geo );
+  const geo = new THREE.BoxGeometry(0.25, 0.25, 0.25)
+  const geometry = new WireframeGeometry2(geo)
   const matLine = new LineMaterial({
     color: 0x4080ff,
     linewidth: 1, // in pixels
     dashed: false
-  });
+  })
 
-  wireframe = new Wireframe( geometry, matLine );
-  wireframe.computeLineDistances();
-  wireframe.scale.set( 1, 1, 1 );
-  scene.add( wireframe );
+  wireframe = new Wireframe(geometry, matLine)
+  wireframe.computeLineDistances()
+  wireframe.scale.set(1, 1, 1)
+  scene.add(wireframe )
 
   pointLight = new THREE.PointLight(0xffffff, 100, 0, 5.0)
   pointLight.position.set(2, 2, 2)
@@ -160,9 +221,21 @@ const go = async () => {
   inputParseInt('#num-angles', (num => numAngles = num))
   inputParseInt('#preview-scale', (num => previewScale = num))
 
-  inputParseInt("#light-angle", (num => lightAngle = num))
-  inputParseInt("#light-distance", (num => lightDistance = num))
-  inputParseInt("#light-intensity", (num => lightIntensity = num))
+  inputParseInt("#light-angle", (num => {
+    const field = document.querySelector("#light-angle-field")!
+    field.textContent = num.toString()
+    lightAngle = num
+  }))
+  inputParseInt("#light-distance", (num => {
+    const field = document.querySelector("#light-distance-field")!
+    field.textContent = num.toString()
+    lightDistance = num
+  }))
+  inputParseInt("#light-intensity", (num => {
+    const field = document.querySelector("#light-intensity-field")!
+    field.textContent = num.toString()
+    lightIntensity = num
+  }))
 
   // window.addEventListener('resize', onWindowResize)
   renderer.domElement.addEventListener('click', clickMe)
