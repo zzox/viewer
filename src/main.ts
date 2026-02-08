@@ -32,7 +32,7 @@ const height = 128
 const target:HTMLDivElement = document.querySelector('#target')!
 const canvas:HTMLCanvasElement = document.querySelector('#twod')!
 
-let clicked = false
+let doRender = false
 
 let wireframe:Wireframe
 
@@ -56,13 +56,20 @@ const updateItems = () => {
   const y = Math.sin(toRadians(lightAngle)) * lightDistance
   pointLight.position.set(x, lightDistance * .33, y)
   wireframe.position.set(x, lightDistance * .33, y)
-  console.log(pointLight.position)
+  // console.log(pointLight.position)
+  doRender = true
 }
 
 const inputParseInt = (selector:string, callback:(n:number) => void) => {
-  document.querySelector<HTMLInputElement>(selector)!.onchange = (el) => {
-    callback(parseInt(el.currentTarget!.value))
+  document.querySelector<HTMLInputElement>(selector)!.onchange = (el:Event) => {
+    const number = parseInt(el.currentTarget!.value)
+    callback(number)
     updateItems()
+
+    const field = document.querySelector<HTMLInputElement>(`${selector}-field`)
+    if (field) {
+      field.textContent = number.toString()
+    }
   }
 }
 
@@ -132,6 +139,7 @@ const createPaletteItems = (list:PaletteList) => {
       } else {
         removeColor(color)
       }
+      doRender = true
     }
 
     container.appendChild(text)
@@ -221,28 +229,16 @@ const go = async () => {
   inputParseInt('#num-angles', (num => numAngles = num))
   inputParseInt('#preview-scale', (num => previewScale = num))
 
-  inputParseInt("#light-angle", (num => {
-    const field = document.querySelector("#light-angle-field")!
-    field.textContent = num.toString()
-    lightAngle = num
-  }))
-  inputParseInt("#light-distance", (num => {
-    const field = document.querySelector("#light-distance-field")!
-    field.textContent = num.toString()
-    lightDistance = num
-  }))
-  inputParseInt("#light-intensity", (num => {
-    const field = document.querySelector("#light-intensity-field")!
-    field.textContent = num.toString()
-    lightIntensity = num
-  }))
+  inputParseInt("#light-angle", (num => lightAngle = num))
+  inputParseInt("#light-distance", (num => lightDistance = num))
+  inputParseInt("#light-intensity", (num => lightIntensity = num))
 
   // window.addEventListener('resize', onWindowResize)
   renderer.domElement.addEventListener('click', clickMe)
 }
 
 const clickMe = () => {
-  clicked = true
+  doRender = true
 }
 
 let scale = 1
@@ -255,7 +251,7 @@ const animate = () => {
 
   renderer.render(scene, camera)
 
-  if (clicked) {
+  if (doRender) {
     console.time('render')
     const canvas:HTMLCanvasElement = document.querySelector('#twod')!
     const twoDcontext = canvas.getContext('2d')!
@@ -274,7 +270,7 @@ const animate = () => {
       object.rotateY(Math.PI * 2 / numAngles)
     }
     renderer.setClearColor(0x000000, 1)
-    clicked = false
+    doRender = false
     wireframe.visible = true
 
     // palette snap
