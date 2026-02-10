@@ -54,19 +54,20 @@ const updateItems = () => {
   pointLight.intensity = lightIntensity
   const x = Math.cos(toRadians(lightAngle)) * lightDistance
   const y = Math.sin(toRadians(lightAngle)) * lightDistance
-  pointLight.position.set(x, lightDistance * .33, y)
-  wireframe.position.set(x, lightDistance * .33, y)
+  pointLight.position.set(x, lightDistance * .5, y)
+  wireframe.position.set(x, lightDistance * .5, y)
   // console.log(pointLight.position)
   doRender = true
 }
 
 const inputParseInt = (selector:string, callback:(n:number) => void) => {
   document.querySelector<HTMLInputElement>(selector)!.onchange = (el:Event) => {
-    const number = parseInt(el.currentTarget!.value)
+    let number = parseInt(el.currentTarget!.value)
     callback(number)
     updateItems()
 
     const field = document.querySelector<HTMLInputElement>(`${selector}-field`)
+    if (selector === '#light-distance') number = number / 10
     if (field) {
       field.textContent = number.toString()
     }
@@ -173,6 +174,7 @@ const go = async () => {
   scene = new THREE.Scene()
 
   const ambientLight = new THREE.AmbientLight(0xffffff)
+  // ambientLight.intensity = 1
   scene.add(ambientLight)
 
   const geo = new THREE.BoxGeometry(0.25, 0.25, 0.25)
@@ -230,7 +232,7 @@ const go = async () => {
   inputParseInt('#preview-scale', (num => previewScale = num))
 
   inputParseInt("#light-angle", (num => lightAngle = num))
-  inputParseInt("#light-distance", (num => lightDistance = num))
+  inputParseInt("#light-distance", (num => lightDistance = num / 10))
   inputParseInt("#light-intensity", (num => lightIntensity = num))
 
   // window.addEventListener('resize', onWindowResize)
